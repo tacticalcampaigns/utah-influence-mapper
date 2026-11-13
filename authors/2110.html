@@ -134,5 +134,53 @@ https://jodytracks.com
 })();
 </script>
 
+
+<div id="gate" role="dialog" aria-modal="true" aria-label="Password required">
+  <div class="gate-card">
+    <div class="gate-brand">Tactical Data &middot; Utah Influence Mapper</div>
+    <h2>Shared password required</h2>
+    <p>This dashboard is shared with invited readers. Enter the shared password to continue.</p>
+    <form id="gate-form">
+      <input id="gate-input" type="password" placeholder="Password" autocomplete="current-password" autofocus>
+      <button type="submit">Continue</button>
+    </form>
+    <p id="gate-error" class="gate-error" hidden>That password didn&rsquo;t match. Try again.</p>
+  </div>
+</div>
+<style>
+#gate{position:fixed;inset:0;z-index:9999;background:#022553;display:flex;align-items:center;justify-content:center;padding:20px}
+.gate-card{background:#fff;border-radius:10px;max-width:420px;width:100%;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center;font-family:Inter,system-ui,sans-serif}
+.gate-brand{font-family:Cinzel,serif;font-weight:600;color:#9A1220;letter-spacing:.04em;margin-bottom:12px}
+.gate-card h2{margin:0 0 8px;font-size:20px;color:#022553}
+.gate-card p{color:#444;font-size:14px;line-height:1.5}
+#gate-form{display:flex;gap:8px;margin-top:16px}
+#gate-input{flex:1;min-width:0;padding:10px 12px;border:1px solid #c9d6e8;border-radius:6px;font-size:15px}
+#gate-form button{background:#9A1220;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-size:15px;cursor:pointer;white-space:nowrap}
+.gate-error{color:#9A1220 !important;margin-top:12px}
+body.gated{overflow:hidden}
+</style>
+<script>
+(function(){
+  var KEY='uim_unlocked';
+  var DIGEST='25115734074a5e33956731a090e3bf758d026717dce17384a6535bc2efd19edd';
+  var gate=document.getElementById('gate');
+  if(!gate) return;
+  try{ if(sessionStorage.getItem(KEY)==='1'){ gate.remove(); return; } }catch(e){}
+  document.body.classList.add('gated');
+  var form=document.getElementById('gate-form');
+  var input=document.getElementById('gate-input');
+  var err=document.getElementById('gate-error');
+  function hex(buf){ return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join(''); }
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    if(!window.crypto || !crypto.subtle){ err.hidden=false; err.textContent='This browser cannot check the password. Try a current browser.'; return; }
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(input.value)).then(function(d){
+      if(hex(d)===DIGEST){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} gate.remove(); document.body.classList.remove('gated'); }
+      else { err.hidden=false; input.select(); }
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
